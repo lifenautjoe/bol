@@ -1,1 +1,1 @@
-# bol-game
+# bol
