@@ -1,6 +1,9 @@
 package com.lifenautjoe.bol.domain;
 
 import com.google.common.collect.Iterables;
+import com.lifenautjoe.bol.domain.exceptions.GameAlreadyStartedException;
+import com.lifenautjoe.bol.domain.exceptions.RequiredUsersNotSet;
+import com.lifenautjoe.bol.domain.exceptions.UserAlreadySetException;
 
 import java.util.*;
 
@@ -12,6 +15,7 @@ public class Game {
     private User userB;
     private GameSlot userAStorageSlot;
     private GameSlot userBStorageSlot;
+    private boolean gameStarted;
 
     // For quick find
     private Map<Integer, GameSlot> slots;
@@ -23,11 +27,19 @@ public class Game {
 
     }
 
-    public void startGame() {
+    public void startGame() throws RequiredUsersNotSet, GameAlreadyStartedException {
+        if (!hasRequiredUsers()) {
+            throw new RequiredUsersNotSet();
+        } else if (isGameStarted()) {
+            throw new GameAlreadyStartedException();
+        }
+
         this.slots = makeSlots();
         this.slotsCollection = this.slots.values();
         this.userAStorageSlot = this.slots.get(BOARD_SLOTS / 2);
         this.userBStorageSlot = this.slots.get(BOARD_SLOTS);
+
+        setGameStarted(true);
     }
 
     public GamePlayOutcome playAtSlotIdForUser(int slotId, User user) {
@@ -78,7 +90,8 @@ public class Game {
         return userA;
     }
 
-    public void setUserA(User userA) {
+    public void setUserA(User userA) throws UserAlreadySetException {
+        if (userA != null) throw new UserAlreadySetException();
         this.userA = userA;
     }
 
@@ -86,7 +99,8 @@ public class Game {
         return userB;
     }
 
-    public void setUserB(User userB) {
+    public void setUserB(User userB) throws UserAlreadySetException {
+        if (userB != null) throw new UserAlreadySetException();
         this.userB = userB;
     }
 
@@ -142,5 +156,17 @@ public class Game {
 
     private boolean slotIsUserStorage(GameSlot slot) {
         return slot == userAStorageSlot || slot == userBStorageSlot;
+    }
+
+    private boolean hasRequiredUsers() {
+        return userA != null && userB != null;
+    }
+
+    public boolean isGameStarted() {
+        return gameStarted;
+    }
+
+    public void setGameStarted(boolean gameStarted) {
+        this.gameStarted = gameStarted;
     }
 }
