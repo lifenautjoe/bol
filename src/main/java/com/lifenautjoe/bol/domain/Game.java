@@ -2,6 +2,7 @@ package com.lifenautjoe.bol.domain;
 
 import com.google.common.collect.Iterables;
 import com.lifenautjoe.bol.domain.exceptions.GameAlreadyStartedException;
+import com.lifenautjoe.bol.domain.exceptions.GameNotStartedException;
 import com.lifenautjoe.bol.domain.exceptions.RequiredUsersNotSet;
 import com.lifenautjoe.bol.domain.exceptions.UserAlreadySetException;
 
@@ -27,7 +28,7 @@ public class Game {
 
     }
 
-    public void startGame() throws RequiredUsersNotSet, GameAlreadyStartedException {
+    public void startGame() {
         if (!hasRequiredUsers()) {
             throw new RequiredUsersNotSet();
         } else if (isGameStarted()) {
@@ -42,12 +43,16 @@ public class Game {
         setGameStarted(true);
     }
 
-    public GamePlayOutcome playAtSlotIdForUser(int slotId, User user) {
+    public GamePlayOutcome playAtSlotWithIdForUser(int slotId, User user) {
         GameSlot slot = this.getSlotWithId(slotId);
         return this.playAtSlotForUser(slot, user);
     }
 
     public GamePlayOutcome playAtSlotForUser(GameSlot slot, User user) {
+
+        if (!isGameStarted()) {
+            throw new GameNotStartedException();
+        }
 
         GamePlayOutcome playOutcome = new GamePlayOutcome();
 
