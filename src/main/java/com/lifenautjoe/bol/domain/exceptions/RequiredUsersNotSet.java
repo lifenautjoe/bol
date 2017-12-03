@@ -1,6 +1,6 @@
 package com.lifenautjoe.bol.domain.exceptions;
 
-public class RequiredUsersNotSet extends Exception {
+public class RequiredUsersNotSet extends RuntimeException {
     public RequiredUsersNotSet() {
 
     }

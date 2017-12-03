@@ -1,6 +1,6 @@
 package com.lifenautjoe.bol.domain.exceptions;
 
-public class GameAlreadyStartedException extends Exception {
+public class GameAlreadyStartedException extends RuntimeException {
     public GameAlreadyStartedException() {
 
     }

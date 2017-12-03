@@ -1,6 +1,6 @@
 package com.lifenautjoe.bol.domain.exceptions;
 
-public class UserAlreadySetException extends Exception {
+public class UserAlreadySetException extends RuntimeException {
     public UserAlreadySetException() {
 
     }
