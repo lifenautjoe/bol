@@ -1,7 +1,11 @@
 package com.lifenautjoe.bol.controllers.users;
 
 
+import javax.validation.constraints.Size;
+
 public class LoginRequestBody {
+
+    @Size(min = 2, max = 32)
     private String userName;
 
     public LoginRequestBody() {
