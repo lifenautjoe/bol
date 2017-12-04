@@ -17,6 +17,7 @@ public class Game {
     private GameSlot userAStorageSlot;
     private GameSlot userBStorageSlot;
     private boolean gameStarted;
+    private String name;
 
     // For quick find
     private Map<Integer, GameSlot> slots;
@@ -24,8 +25,8 @@ public class Game {
     // For making iterators
     private Collection<GameSlot> slotsCollection;
 
-    public Game() {
-
+    public Game(String name) {
+        this.name = name;
     }
 
     public void startGame() {
@@ -41,6 +42,26 @@ public class Game {
         this.userBStorageSlot = this.slots.get(BOARD_SLOTS);
 
         setGameStarted(true);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (!Game.class.isAssignableFrom(obj.getClass())) {
+            return false;
+        }
+        final Game other = (Game) obj;
+        if ((this.name == null) ? (other.name != null) : !this.name.equals(other.name)) {
+            return false;
+        }
+        return true;
     }
 
     public GamePlayOutcome playAtSlotWithIdForUser(int slotId, User user) {
@@ -107,6 +128,10 @@ public class Game {
     public void setUserB(User userB) throws UserAlreadySetException {
         if (userB != null) throw new UserAlreadySetException();
         this.userB = userB;
+    }
+
+    public String getName() {
+        return name;
     }
 
     private Iterator<GameSlot> getIteratorAtSlot(GameSlot slot) {
