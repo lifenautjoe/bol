@@ -1,10 +1,7 @@
 package com.lifenautjoe.bol.domain;
 
 import com.google.common.collect.Iterables;
-import com.lifenautjoe.bol.domain.exceptions.GameAlreadyStartedException;
-import com.lifenautjoe.bol.domain.exceptions.GameNotStartedException;
-import com.lifenautjoe.bol.domain.exceptions.RequiredUsersNotSet;
-import com.lifenautjoe.bol.domain.exceptions.UserAlreadySetException;
+import com.lifenautjoe.bol.domain.exceptions.*;
 
 import java.util.*;
 
@@ -30,7 +27,7 @@ public class Game {
     }
 
     public void startGame() {
-        if (!hasRequiredUsers()) {
+        if (!isFull()) {
             throw new RequiredUsersNotSet();
         } else if (isGameStarted()) {
             throw new GameAlreadyStartedException();
@@ -112,26 +109,29 @@ public class Game {
         return playOutcome;
     }
 
-    public User getUserA() {
-        return userA;
+    public void addUser(User user) {
+        if (isFull()) throw new GameFullException();
+        if (userA == null) {
+            userA = user;
+        } else if (userB == null) {
+            userB = user;
+        }
     }
 
-    public void setUserA(User userA) throws UserAlreadySetException {
-        if (userA != null) throw new UserAlreadySetException();
-        this.userA = userA;
+    public User getUserA() {
+        return userA;
     }
 
     public User getUserB() {
         return userB;
     }
 
-    public void setUserB(User userB) throws UserAlreadySetException {
-        if (userB != null) throw new UserAlreadySetException();
-        this.userB = userB;
-    }
-
     public String getName() {
         return name;
+    }
+
+    public boolean isFull() {
+        return userA != null && userB != null;
     }
 
     private Iterator<GameSlot> getIteratorAtSlot(GameSlot slot) {
@@ -186,10 +186,6 @@ public class Game {
 
     private boolean slotIsUserStorage(GameSlot slot) {
         return slot == userAStorageSlot || slot == userBStorageSlot;
-    }
-
-    private boolean hasRequiredUsers() {
-        return userA != null && userB != null;
     }
 
     public boolean isGameStarted() {
