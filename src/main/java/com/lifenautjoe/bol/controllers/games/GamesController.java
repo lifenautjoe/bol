@@ -3,15 +3,17 @@ package com.lifenautjoe.bol.controllers.games;
 import com.lifenautjoe.bol.domain.Game;
 import com.lifenautjoe.bol.domain.GamePlayOutcome;
 import com.lifenautjoe.bol.domain.User;
-import com.lifenautjoe.bol.services.GamesManagerService;
-import com.lifenautjoe.bol.services.UsersManagerService;
+import com.lifenautjoe.bol.services.games.GamesManagerService;
+import com.lifenautjoe.bol.services.users.UsersManagerService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 
 
 import javax.servlet.http.HttpSession;
-import java.util.List;
+import java.util.Collection;
 
 @RestController
 @RequestMapping(path = "/games")
@@ -31,23 +33,67 @@ public class GamesController {
 
 
     @RequestMapping(path = "")
-    public List<Game> getAll() {
+    public Collection<Game> getAll() {
         return gamesManagerService.getAll();
     }
 
-    @RequestMapping(path = "/{gameId}/join")
-    public void joinGame(@PathVariable("gameId") int gameId, HttpSession httpSession) {
+    @RequestMapping(path = "/{gameName}/join")
+    public ResponseEntity<?> joinGame(@PathVariable("gameName") String gameName, HttpSession httpSession) {
+        if (!usersManagerService.sessionHasUser(httpSession)) {
+            return ResponseEntity
+                    .status(HttpStatus.FORBIDDEN)
+                    .body("User is not logged in");
+        }
 
+        User user = usersManagerService.getUserFromSession(httpSession);
+
+        if (user.hasGame()) {
+            return ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .body("User already has game");
+        }
+
+        Game game = gamesManagerService.getOrCreateGameWithName(gameName);
+
+        if (game.isFull()) {
+            return ResponseEntity
+                    .status(HttpStatus.FORBIDDEN)
+                    .body("Game is full");
+        }
+
+        user.setGame(game);
+
+        return ResponseEntity.ok("Game joined!");
     }
 
     @RequestMapping(path = "/{gameId}/play", method = RequestMethod.POST)
-    public void gamePlay(@PathVariable("gameId") int gameId,
-                     @RequestBody() GamePlayRequestBody body,
-                     HttpSession httpSession) {
+    public ResponseEntity gamePlay(@PathVariable("gameId") int gameId,
+                                   @RequestBody() GamePlayRequestBody body,
+                                   HttpSession httpSession) {
+        if (!usersManagerService.sessionHasUser(httpSession)) {
+            return ResponseEntity
+                    .status(HttpStatus.FORBIDDEN)
+                    .body("User is not logged in");
+        }
+
+        int slotIdToPlayAt = body.getSlotId();
+
         User user = usersManagerService.getUserFromSession(httpSession);
-        Game userGame = user.getCurrentGame();
-        GamePlayOutcome playOutcome = userGame.playAtSlotWithIdForUser(body.getSlotId(), user);
+
+        if (!user.hasGame()) {
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body("User is in no game");
+        }
+
+        GamePlayOutcome playOutcome = user.playGameAtSlotWithId(slotIdToPlayAt);
+
+        if (playOutcome.isGameFinished()) {
+            // Clean up
+        }
+
         this.template.convertAndSend("/games/" + gameId, playOutcome);
+        return ResponseEntity.ok("Played!");
     }
 
 }
