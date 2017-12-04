@@ -1,5 +1,7 @@
 package com.lifenautjoe.bol.domain;
 
+import com.lifenautjoe.bol.domain.exceptions.UserHasNoGameException;
+
 import java.util.Objects;
 
 public class User {
@@ -41,6 +43,13 @@ public class User {
     public void setGame(Game game) {
         this.game = game;
         game.addUser(this);
+    }
+
+    public GamePlayOutcome playGameAtSlotWithId(int slotId) {
+        if (!hasGame()) {
+            throw new UserHasNoGameException();
+        }
+        return game.playAtSlotWithIdForUser(slotId, this);
     }
 
     public boolean hasGame() {
