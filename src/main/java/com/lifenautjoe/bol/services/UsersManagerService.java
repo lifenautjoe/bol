@@ -21,7 +21,7 @@ public class UsersManagerService {
     }
 
     public User getUserFromSession(HttpSession httpSession) {
-        String sessionUserName = (String) httpSession.getAttribute(SESSION_USERNAME_KEY);
+        String sessionUserName = getUserNameFromSession(httpSession);
         if (sessionUserName == null) {
             throw new SessionHasNoUserException();
         }
@@ -37,12 +37,30 @@ public class UsersManagerService {
     }
 
     public User createUserForSession(String userName, HttpSession session) throws UserAlreadyExistsException {
-        if (users.containsKey(userName)) {
+        if (userNameAlreadyExists(userName)) {
             throw new UserAlreadyExistsException();
         }
         User user = new User(userName);
         users.put(userName, user);
         return user;
+    }
+
+    public void removeUserForSession(HttpSession session) {
+        User user = getUserFromSession(session);
+        users.remove(user.getName());
+    }
+
+    public boolean sessionHasUser(HttpSession session) {
+        String userName = getUserNameFromSession(session);
+        return userName != null;
+    }
+
+    public boolean userNameAlreadyExists(String userName) {
+        return users.containsKey(userName);
+    }
+
+    private String getUserNameFromSession(HttpSession httpSession) {
+        return (String) httpSession.getAttribute(SESSION_USERNAME_KEY);
     }
 
 }
