@@ -1,4 +1,4 @@
-package com.lifenautjoe.bol.services.exceptions;
+package com.lifenautjoe.bol.services.users.exceptions;
 
 public class SessionHasNoUserException extends RuntimeException {
     public SessionHasNoUserException() {

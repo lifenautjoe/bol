@@ -1,9 +1,9 @@
-package com.lifenautjoe.bol.services;
+package com.lifenautjoe.bol.services.users;
 
 import com.lifenautjoe.bol.domain.User;
-import com.lifenautjoe.bol.services.exceptions.SessionHasNoUserException;
-import com.lifenautjoe.bol.services.exceptions.UserAlreadyExistsException;
-import com.lifenautjoe.bol.services.exceptions.UserDoesNotExistException;
+import com.lifenautjoe.bol.services.users.exceptions.SessionHasNoUserException;
+import com.lifenautjoe.bol.services.users.exceptions.UserAlreadyExistsException;
+import com.lifenautjoe.bol.services.users.exceptions.UserDoesNotExistException;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpSession;
