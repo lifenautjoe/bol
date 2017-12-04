@@ -1,7 +1,7 @@
 package com.lifenautjoe.bol.controllers.users;
 
 import com.lifenautjoe.bol.domain.User;
-import com.lifenautjoe.bol.services.UsersManagerService;
+import com.lifenautjoe.bol.services.users.UsersManagerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
