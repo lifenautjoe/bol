@@ -4,7 +4,7 @@ import java.util.Objects;
 
 public class User {
     private String name;
-    private Game currentGame;
+    private Game game;
 
     public User(String name) {
         this.name = name;
@@ -34,15 +34,16 @@ public class User {
         return name;
     }
 
-    public Game getCurrentGame() {
-        return currentGame;
+    public Game getGame() {
+        return game;
     }
 
-    public void setCurrentGame(Game currentGame) {
-        this.currentGame = currentGame;
+    public void setGame(Game game) {
+        this.game = game;
+        game.addUser(this);
     }
 
     public boolean hasGame() {
-        return this.currentGame == null;
+        return this.game == null;
     }
 }
