@@ -16,6 +16,7 @@ public class Game {
     private List<GameSlot> userANormalSlots;
     private List<GameSlot> userBNormalSlots;
     private boolean gameStarted;
+    private boolean gameFinished;
     private String name;
 
     // For quick find
@@ -29,6 +30,11 @@ public class Game {
     }
 
     public void startGame() {
+        if (BOARD_SLOTS % 2 > 0 || BOARD_SLOTS < 4) {
+            // Safety
+            throw new RuntimeException("BOARD_SLOTS must be divisible by 2 and gt 4!");
+        }
+
         if (!isFull()) {
             throw new RequiredUsersNotSet();
         } else if (isGameStarted()) {
@@ -74,6 +80,10 @@ public class Game {
             throw new GameNotStartedException();
         }
 
+        if (isGameFinished()) {
+            throw new GameFinishedException();
+        }
+
         GamePlayOutcome playOutcome = new GamePlayOutcome();
 
         if (isUserB(user)) {
@@ -117,6 +127,7 @@ public class Game {
                 if (normalSlotsAreEmptyForUser(user)) {
                     // Yay
                     userWon = true;
+                    setGameFinished(true);
                     playOutcome.setGameFinished(true);
                     playOutcome.setWinner(user);
                 }
@@ -157,6 +168,14 @@ public class Game {
 
     public void setGameStarted(boolean gameStarted) {
         this.gameStarted = gameStarted;
+    }
+
+    public boolean isGameFinished() {
+        return gameFinished;
+    }
+
+    public void setGameFinished(boolean gameFinished) {
+        this.gameFinished = gameFinished;
     }
 
     private Iterator<GameSlot> getIteratorAtSlot(GameSlot slot) {
