@@ -13,6 +13,8 @@ public class Game {
     private User userB;
     private GameSlot userAStorageSlot;
     private GameSlot userBStorageSlot;
+    private List<GameSlot> userANormalSlots;
+    private List<GameSlot> userBNormalSlots;
     private boolean gameStarted;
     private String name;
 
@@ -33,7 +35,7 @@ public class Game {
             throw new GameAlreadyStartedException();
         }
 
-        this.slots = makeSlots();
+        bootstrapSlots();
         this.slotsCollection = this.slots.values();
         this.userAStorageSlot = this.slots.get(BOARD_SLOTS / 2);
         this.userBStorageSlot = this.slots.get(BOARD_SLOTS);
@@ -74,11 +76,19 @@ public class Game {
 
         GamePlayOutcome playOutcome = new GamePlayOutcome();
 
+        if (isUserB(user)) {
+            playOutcome.setNextTurnHolder(userA);
+        } else {
+            playOutcome.setNextTurnHolder(userB);
+        }
+
         Iterator<GameSlot> slotIterator = getIteratorAtSlot(slot);
 
         LinkedList<GameSlotStone> userStones = slot.pickStones();
 
-        while (!userStones.isEmpty()) {
+        boolean userWon = false;
+
+        while (!userStones.isEmpty() && !userWon) {
 
             GameSlot nextSlot = slotIterator.next();
 
@@ -90,7 +100,7 @@ public class Game {
                         GameSlotStone userStoneToAddToSlot = userStones.pop();
                         nextSlot.dropStone(userStoneToAddToSlot);
 
-                        playOutcome.setUserHasAnotherTurn(true);
+                        playOutcome.setNextTurnHolder(user);
                     } else if (nextSlot.isEmpty()) {
                         // We take the stone to the storage and all of the ones across
                         GameSlot slotAcrossBoard = getSlotAcrossBoard(nextSlot);
@@ -102,6 +112,13 @@ public class Game {
                     // A simple drop
                     GameSlotStone userStoneToAddToSlot = userStones.pop();
                     nextSlot.dropStone(userStoneToAddToSlot);
+                }
+
+                if (normalSlotsAreEmptyForUser(user)) {
+                    // Yay
+                    userWon = true;
+                    playOutcome.setGameFinished(true);
+                    playOutcome.setWinner(user);
                 }
             }
         }
@@ -134,6 +151,14 @@ public class Game {
         return userA != null && userB != null;
     }
 
+    public boolean isGameStarted() {
+        return gameStarted;
+    }
+
+    public void setGameStarted(boolean gameStarted) {
+        this.gameStarted = gameStarted;
+    }
+
     private Iterator<GameSlot> getIteratorAtSlot(GameSlot slot) {
         Iterator<GameSlot> iterator = Iterables.cycle(Iterables.skip(slotsCollection, slot.getId())).iterator();
         return iterator;
@@ -153,7 +178,7 @@ public class Game {
         return slots.get(slotId);
     }
 
-    private Map<Integer, GameSlot> makeSlots() {
+    private void bootstrapSlots() {
 
         int slotsPerUser = BOARD_SLOTS / 2;
 
@@ -162,8 +187,9 @@ public class Game {
         for (int slotId = 1; slotId < BOARD_SLOTS; slotId++) {
 
             User slotOwner = null;
+            boolean userBIsOwner = slotId > slotsPerUser;
 
-            if (slotId > slotsPerUser) {
+            if (userBIsOwner) {
                 slotOwner = userB;
             } else {
                 slotOwner = userA;
@@ -178,21 +204,32 @@ public class Game {
 
             GameSlot slot = new GameSlot(slotId, slotOwner, slotStones);
 
+            List<GameSlot> userNormalSlots = userBIsOwner ? userBNormalSlots : userANormalSlots;
+            userNormalSlots.add(slot);
+
             slots.put(slotId, slot);
         }
 
-        return slots;
+        this.slots = slots;
+    }
+
+    private boolean normalSlotsAreEmptyForUser(User user) {
+        boolean normalSlotsAreEmpty = true;
+        List<GameSlot> userNormalSlots = isUserB(user) ? userBNormalSlots : userANormalSlots;
+        for (GameSlot slot : userNormalSlots) {
+            if (!slot.isEmpty()) {
+                normalSlotsAreEmpty = false;
+                break;
+            }
+        }
+        return normalSlotsAreEmpty;
+    }
+
+    private boolean isUserB(User user) {
+        return user == getUserB();
     }
 
     private boolean slotIsUserStorage(GameSlot slot) {
         return slot == userAStorageSlot || slot == userBStorageSlot;
-    }
-
-    public boolean isGameStarted() {
-        return gameStarted;
-    }
-
-    public void setGameStarted(boolean gameStarted) {
-        this.gameStarted = gameStarted;
     }
 }
