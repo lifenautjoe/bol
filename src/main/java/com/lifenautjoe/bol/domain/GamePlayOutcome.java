@@ -1,19 +1,29 @@
 package com.lifenautjoe.bol.domain;
 
+import java.util.List;
+
 public class GamePlayOutcome {
 
     private boolean gameFinished;
+    // Make sure they are copies!
+    private String nextTurnHolderUserName;
+    private String winnerUserName;
+    private List<GameSlot> slots;
 
-    private User nextTurnHolder;
-
-    private User winner;
-
-    public User getNextTurnHolder() {
-        return nextTurnHolder;
+    public String getNextTurnHolderUserName() {
+        return nextTurnHolderUserName;
     }
 
-    public void setNextTurnHolder(User nextTurnHolder) {
-        this.nextTurnHolder = nextTurnHolder;
+    public void setNextTurnHolderUserName(String nextTurnHolderUserName) {
+        this.nextTurnHolderUserName = nextTurnHolderUserName;
+    }
+
+    public String getWinnerUserName() {
+        return winnerUserName;
+    }
+
+    public void setWinnerUserName(String winnerUserName) {
+        this.winnerUserName = winnerUserName;
     }
 
     public boolean isGameFinished() {
@@ -24,11 +34,11 @@ public class GamePlayOutcome {
         this.gameFinished = gameFinished;
     }
 
-    public User getWinner() {
-        return winner;
+    public List<GameSlot> getSlots() {
+        return slots;
     }
 
-    public void setWinner(User winner) {
-        this.winner = winner;
+    public void setSlots(List<GameSlot> slots) {
+        this.slots = slots;
     }
 }
