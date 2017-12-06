@@ -36,10 +36,6 @@ public class User {
         return name;
     }
 
-    public Game getGame() {
-        return game;
-    }
-
     public void setGame(Game game) {
         this.game = game;
         game.addUser(this);
@@ -54,5 +50,33 @@ public class User {
 
     public boolean hasGame() {
         return this.game == null;
+    }
+
+    public boolean hasGameWithName(String gameName) {
+        if (!hasGame()) return false;
+        return game.getName() == gameName;
+    }
+
+    public GamePlayOutcome terminateGame() {
+        Game game = getGame();
+        GamePlayOutcome gamePlayOutcome = game.terminateGameForUser(this);
+        removeGame();
+        return gamePlayOutcome;
+    }
+
+    public String getGameName() {
+        Game game = getGame();
+        return game.getName();
+    }
+
+    private void removeGame() {
+        this.game = null;
+    }
+
+    private Game getGame() {
+        if (!hasGame()) {
+            throw new UserHasNoGameException();
+        }
+        return game;
     }
 }
