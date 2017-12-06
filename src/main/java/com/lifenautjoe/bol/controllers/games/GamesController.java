@@ -66,8 +66,8 @@ public class GamesController {
         return ResponseEntity.ok("Game joined!");
     }
 
-    @RequestMapping(path = "/{gameId}/play", method = RequestMethod.POST)
-    public ResponseEntity gamePlay(@PathVariable("gameId") int gameId,
+    @RequestMapping(path = "/{gameName}/play", method = RequestMethod.POST)
+    public ResponseEntity gamePlay(@PathVariable() String gameName,
                                    @RequestBody() GamePlayRequestBody body,
                                    HttpSession httpSession) {
         if (!usersManagerService.sessionHasUser(httpSession)) {
@@ -80,19 +80,19 @@ public class GamesController {
 
         User user = usersManagerService.getUserFromSession(httpSession);
 
-        if (!user.hasGame()) {
+        if (!user.hasGameWithName(gameName)) {
             return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .body("User is in no game");
+                    .status(HttpStatus.FORBIDDEN)
+                    .body("User is not in given game");
         }
 
         GamePlayOutcome playOutcome = user.playGameAtSlotWithId(slotIdToPlayAt);
 
         if (playOutcome.isGameFinished()) {
-            // Clean up
+            gamesManagerService.removeGameWithName(gameName);
         }
 
-        this.template.convertAndSend("/games/" + gameId, playOutcome);
+        this.template.convertAndSend("/games/" + gameName, playOutcome);
         return ResponseEntity.ok("Played!");
     }
 
