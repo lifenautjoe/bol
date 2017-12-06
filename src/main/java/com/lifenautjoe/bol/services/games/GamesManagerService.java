@@ -48,4 +48,13 @@ public class GamesManagerService {
     public Collection<Game> getAll() {
         return games.values();
     }
+
+    public void removeGame(Game game) {
+        String gameName = game.getName();
+        removeGameWithName(gameName);
+    }
+
+    public void removeGameWithName(String gameName) {
+        games.remove(gameName);
+    }
 }
