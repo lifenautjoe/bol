@@ -36,7 +36,7 @@ public class Game {
         }
 
         if (!isFull()) {
-            throw new RequiredUsersNotSet();
+            throw new GameIsNotFullException();
         } else if (isGameStarted()) {
             throw new GameAlreadyStartedException();
         }
@@ -86,11 +86,9 @@ public class Game {
 
         GamePlayOutcome playOutcome = new GamePlayOutcome();
 
-        if (isUserB(user)) {
-            playOutcome.setNextTurnHolder(userA);
-        } else {
-            playOutcome.setNextTurnHolder(userB);
-        }
+        String opponentUserName = getOpponentUserNameForUser(user);
+
+        playOutcome.setNextTurnHolderUserName(opponentUserName);
 
         Iterator<GameSlot> slotIterator = getIteratorAtSlot(slot);
 
@@ -102,7 +100,7 @@ public class Game {
 
             GameSlot nextSlot = slotIterator.next();
 
-            if (nextSlot.belongsToUser(user)) {
+            if (slotBelongsToUser(slot, user)) {
                 if (userStones.size() == 1) {
                     // Last one
                     if (slotIsUserStorage(nextSlot)) {
@@ -110,7 +108,7 @@ public class Game {
                         GameSlotStone userStoneToAddToSlot = userStones.pop();
                         nextSlot.dropStone(userStoneToAddToSlot);
 
-                        playOutcome.setNextTurnHolder(user);
+                        playOutcome.setNextTurnHolderUserName(user.getName());
                     } else if (nextSlot.isEmpty()) {
                         // We take the stone to the storage and all of the ones across
                         GameSlot slotAcrossBoard = getSlotAcrossBoard(nextSlot);
@@ -127,14 +125,32 @@ public class Game {
                 if (normalSlotsAreEmptyForUser(user)) {
                     // Yay
                     userWon = true;
-                    setGameFinished(true);
+                    onGameFinished();
                     playOutcome.setGameFinished(true);
-                    playOutcome.setWinner(user);
+                    playOutcome.setWinnerUserName(user.getName());
                 }
             }
         }
 
+        List<GameSlot> latestGameSlots = getSlots();
+
+        playOutcome.setSlots(latestGameSlots);
+
         return playOutcome;
+    }
+
+    public GamePlayOutcome terminateGameForUser(User user) {
+        if (!isGameStarted()) {
+            throw new GameNotStartedException();
+        }
+        GamePlayOutcome gamePlayOutcome = new GamePlayOutcome();
+        gamePlayOutcome.setGameFinished(true);
+
+        String opponentUserName = getOpponentUserNameForUser(user);
+        gamePlayOutcome.setWinnerUserName(opponentUserName);
+
+        onGameFinished();
+        return gamePlayOutcome;
     }
 
     public void addUser(User user) {
@@ -144,6 +160,15 @@ public class Game {
         } else if (userB == null) {
             userB = user;
         }
+    }
+
+    public List<GameSlot> getSlots() {
+        List<GameSlot> clonedSlots = new ArrayList<>();
+        for (Map.Entry<Integer, GameSlot> map : slots.entrySet()) {
+            GameSlot slot = map.getValue();
+            clonedSlots.add(slot.clone());
+        }
+        return clonedSlots;
     }
 
     public User getUserA() {
@@ -176,6 +201,12 @@ public class Game {
 
     public void setGameFinished(boolean gameFinished) {
         this.gameFinished = gameFinished;
+    }
+
+    private void onGameFinished() {
+        setGameFinished(true);
+        userA.removeGame();
+        userB.removeGame();
     }
 
     private Iterator<GameSlot> getIteratorAtSlot(GameSlot slot) {
@@ -221,7 +252,7 @@ public class Game {
                 slotStones.add(stone);
             }
 
-            GameSlot slot = new GameSlot(slotId, slotOwner, slotStones);
+            GameSlot slot = new GameSlot(slotId, slotStones);
 
             List<GameSlot> userNormalSlots = userBIsOwner ? userBNormalSlots : userANormalSlots;
             userNormalSlots.add(slot);
@@ -234,7 +265,7 @@ public class Game {
 
     private boolean normalSlotsAreEmptyForUser(User user) {
         boolean normalSlotsAreEmpty = true;
-        List<GameSlot> userNormalSlots = isUserB(user) ? userBNormalSlots : userANormalSlots;
+        List<GameSlot> userNormalSlots = getNormalSlotsForUser(user);
         for (GameSlot slot : userNormalSlots) {
             if (!slot.isEmpty()) {
                 normalSlotsAreEmpty = false;
@@ -244,6 +275,23 @@ public class Game {
         return normalSlotsAreEmpty;
     }
 
+
+    private String getOpponentUserNameForUser(User user) {
+        User opponent = getOpponentForUser(user);
+        return opponent.getName();
+    }
+
+    private User getOpponentForUser(User user) {
+        User opponent = null;
+        if (isUserB(user)) {
+            opponent = userA;
+        } else {
+            opponent = userB;
+        }
+
+        return opponent;
+    }
+
     private boolean isUserB(User user) {
         return user == getUserB();
     }
@@ -251,4 +299,21 @@ public class Game {
     private boolean slotIsUserStorage(GameSlot slot) {
         return slot == userAStorageSlot || slot == userBStorageSlot;
     }
+
+    private boolean slotBelongsToUser(GameSlot slot, User user) {
+        return slot == getStorageSlotForUser(user) || getNormalSlotsForUser(user).contains(slot);
+    }
+
+    private List<GameSlot> getNormalSlotsForUser(User user) {
+        List<GameSlot> normalSlots;
+
+        if (isUserB(user)) {
+            normalSlots = userBNormalSlots;
+        } else {
+            normalSlots = userANormalSlots;
+        }
+
+        return normalSlots;
+    }
+
 }
