@@ -1,16 +1,18 @@
 package com.lifenautjoe.bol.domain;
 
+
+import org.apache.commons.lang3.SerializationUtils;
+
+import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
 
-public class GameSlot {
+public class GameSlot implements Cloneable, Serializable {
     private final int id;
-    private final User owner;
     private LinkedList<GameSlotStone> stones;
 
-    public GameSlot(int id, User owner, LinkedList<GameSlotStone> stones) {
+    public GameSlot(int id, LinkedList<GameSlotStone> stones) {
         this.id = id;
-        this.owner = owner;
         this.stones = stones;
     }
 
@@ -39,7 +41,30 @@ public class GameSlot {
         return stonesClone;
     }
 
-    public boolean belongsToUser(User user) {
-        return user == this.owner;
+    @Override
+    public GameSlot clone() {
+        return SerializationUtils.clone(this);
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (!GameSlot.class.isAssignableFrom(obj.getClass())) {
+            return false;
+        }
+        final GameSlot other = (GameSlot) obj;
+
+        if (this.id != other.id) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return this.id;
+    }
+
 }
