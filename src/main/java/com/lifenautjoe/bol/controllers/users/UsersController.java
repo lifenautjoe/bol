@@ -1,5 +1,6 @@
 package com.lifenautjoe.bol.controllers.users;
 
+import com.lifenautjoe.bol.controllers.ApiResponse;
 import com.lifenautjoe.bol.domain.User;
 import com.lifenautjoe.bol.services.users.UsersManagerService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,30 +22,43 @@ public class UsersController {
     }
 
     @RequestMapping(path = "login", method = RequestMethod.POST)
-    public ResponseEntity<?> login(@RequestBody LoginRequestBody body, HttpSession httpSession) {
+    public ResponseEntity<Object> login(@RequestBody LoginRequestBody body, HttpSession httpSession) {
 
         String userName = body.getUserName();
 
-        User user = null;
+        ResponseEntity response;
+
         if (usersManagerService.sessionHasUser(httpSession)) {
-            user = usersManagerService.getUserFromSession(httpSession);
+            response = ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(new ApiResponse("Already logged in"));
+        } else if (usersManagerService.userNameAlreadyExists(userName)) {
+            response = ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .body(new ApiResponse("User name already taken"));
         } else {
-            if (usersManagerService.userNameAlreadyExists(userName)) {
-                return ResponseEntity
-                        .status(HttpStatus.CONFLICT)
-                        .body("User name already taken");
-            }
-            user = usersManagerService.createUserForSession(body.getUserName(), httpSession);
+            User user = usersManagerService.createUserForSession(body.getUserName(), httpSession);
+            response = ResponseEntity.ok().body(new LoginResponseBody(user.getName()));
         }
 
-        return ResponseEntity.ok().body(user);
+        return response;
     }
 
     @RequestMapping(path = "logout", method = RequestMethod.POST)
     @ResponseStatus(value = HttpStatus.OK)
-    public void logout(HttpSession httpSession) {
+    public ResponseEntity<Object> logout(HttpSession httpSession) {
+
+        ResponseEntity response;
+
         if (usersManagerService.sessionHasUser(httpSession)) {
             usersManagerService.removeUserForSession(httpSession);
+            response = ResponseEntity.ok().body(new ApiResponse("User successfully logged out"));
+        } else {
+            response = ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(new ApiResponse("User not logged in"));
         }
+
+        return response;
     }
 }
