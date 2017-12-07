@@ -18,6 +18,7 @@ public class Game {
     private boolean gameStarted;
     private boolean gameFinished;
     private String name;
+    private Random randomness;
 
     // For quick find
     private Map<Integer, GameSlot> slots;
@@ -29,7 +30,7 @@ public class Game {
         this.name = name;
     }
 
-    public void startGame() {
+    public GamePlayOutcome startGame() {
         if (BOARD_SLOTS % 2 > 0 || BOARD_SLOTS < 4) {
             // Safety
             throw new RuntimeException("BOARD_SLOTS must be divisible by 2 and gt 4!");
@@ -41,12 +42,24 @@ public class Game {
             throw new GameAlreadyStartedException();
         }
 
+        this.randomness = new Random();
+
         bootstrapSlots();
         this.slotsCollection = this.slots.values();
         this.userAStorageSlot = this.slots.get(BOARD_SLOTS / 2);
         this.userBStorageSlot = this.slots.get(BOARD_SLOTS);
 
         setGameStarted(true);
+
+        GamePlayOutcome initialPlayOutcome = new GamePlayOutcome();
+
+        String firstTurnUserName = getRandomUserName();
+        initialPlayOutcome.setNextTurnHolderUserName(firstTurnUserName);
+
+        List<GameSlot> initialGameSlots = getSlots();
+        initialPlayOutcome.setSlots(initialGameSlots);
+
+        return initialPlayOutcome;
     }
 
     @Override
@@ -69,12 +82,8 @@ public class Game {
         return true;
     }
 
-    public GamePlayOutcome playAtSlotWithIdForUser(int slotId, User user) {
-        GameSlot slot = this.getSlotWithId(slotId);
-        return this.playAtSlotForUser(slot, user);
-    }
 
-    public GamePlayOutcome playAtSlotForUser(GameSlot slot, User user) {
+    public GamePlayOutcome playAtSlotWithIdForUser(int slotId, User user) {
 
         if (!isGameStarted()) {
             throw new GameNotStartedException();
@@ -84,11 +93,11 @@ public class Game {
             throw new GameFinishedException();
         }
 
+        GameSlot slot = this.getSlotWithId(slotId);
+
+        String nextTurnHolderUserName = getOpponentUserNameForUser(user);
+
         GamePlayOutcome playOutcome = new GamePlayOutcome();
-
-        String opponentUserName = getOpponentUserNameForUser(user);
-
-        playOutcome.setNextTurnHolderUserName(opponentUserName);
 
         Iterator<GameSlot> slotIterator = getIteratorAtSlot(slot);
 
@@ -108,7 +117,7 @@ public class Game {
                         GameSlotStone userStoneToAddToSlot = userStones.pop();
                         nextSlot.dropStone(userStoneToAddToSlot);
 
-                        playOutcome.setNextTurnHolderUserName(user.getName());
+                        nextTurnHolderUserName = user.getName();
                     } else if (nextSlot.isEmpty()) {
                         // We take the stone to the storage and all of the ones across
                         GameSlot slotAcrossBoard = getSlotAcrossBoard(nextSlot);
@@ -131,6 +140,8 @@ public class Game {
                 }
             }
         }
+
+        playOutcome.setNextTurnHolderUserName(nextTurnHolderUserName);
 
         List<GameSlot> latestGameSlots = getSlots();
 
@@ -205,8 +216,6 @@ public class Game {
 
     private void onGameFinished() {
         setGameFinished(true);
-        userA.removeGame();
-        userB.removeGame();
     }
 
     private Iterator<GameSlot> getIteratorAtSlot(GameSlot slot) {
@@ -314,6 +323,15 @@ public class Game {
         }
 
         return normalSlots;
+    }
+
+    private String getRandomUserName() {
+        User user = getRandomUser();
+        return user.getName();
+    }
+
+    private User getRandomUser() {
+        return randomness.nextBoolean() ? userA : userB;
     }
 
 }
