@@ -1,6 +1,8 @@
 package com.lifenautjoe.bol.controllers.users;
 
 import com.lifenautjoe.bol.controllers.ApiResponse;
+import com.lifenautjoe.bol.controllers.users.requests.LoginRequestBody;
+import com.lifenautjoe.bol.controllers.users.responses.LoginResponseBody;
 import com.lifenautjoe.bol.domain.User;
 import com.lifenautjoe.bol.services.users.UsersManagerService;
 import org.springframework.beans.factory.annotation.Autowired;
