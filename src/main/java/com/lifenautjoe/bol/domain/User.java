@@ -1,10 +1,13 @@
 package com.lifenautjoe.bol.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.lifenautjoe.bol.domain.exceptions.UserHasNoGameException;
+import org.apache.commons.lang3.SerializationUtils;
 
+import java.io.Serializable;
 import java.util.Objects;
 
-public class User {
+public class User implements Cloneable, Serializable {
     private String name;
     private Game game;
 
@@ -32,6 +35,11 @@ public class User {
         return true;
     }
 
+    @Override
+    public User clone() {
+        return SerializationUtils.clone(this);
+    }
+
     public String getName() {
         return name;
     }
@@ -49,12 +57,12 @@ public class User {
     }
 
     public boolean hasGame() {
-        return this.game == null;
+        return this.game != null;
     }
 
     public boolean hasGameWithName(String gameName) {
         if (!hasGame()) return false;
-        return game.getName() == gameName;
+        return game.getName().equals(gameName);
     }
 
     public GamePlayOutcome terminateGame() {
