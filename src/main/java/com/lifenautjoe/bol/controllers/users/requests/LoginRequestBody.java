@@ -1,4 +1,4 @@
-package com.lifenautjoe.bol.controllers.users;
+package com.lifenautjoe.bol.controllers.users.requests;
 
 
 import javax.validation.constraints.Size;

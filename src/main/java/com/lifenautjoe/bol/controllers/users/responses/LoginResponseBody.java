@@ -1,4 +1,4 @@
-package com.lifenautjoe.bol.controllers.users;
+package com.lifenautjoe.bol.controllers.users.responses;
 
 public class LoginResponseBody {
     private String loggedInUser;

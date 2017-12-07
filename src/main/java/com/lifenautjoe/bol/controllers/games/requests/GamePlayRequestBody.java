@@ -1,4 +1,4 @@
-package com.lifenautjoe.bol.controllers.games;
+package com.lifenautjoe.bol.controllers.games.requests;
 
 public class GamePlayRequestBody {
     private int slotId;
