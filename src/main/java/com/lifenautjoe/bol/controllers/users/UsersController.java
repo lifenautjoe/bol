@@ -2,6 +2,7 @@ package com.lifenautjoe.bol.controllers.users;
 
 import com.lifenautjoe.bol.controllers.ApiResponse;
 import com.lifenautjoe.bol.controllers.users.requests.LoginRequestBody;
+import com.lifenautjoe.bol.controllers.users.responses.IsLoggedInResponse;
 import com.lifenautjoe.bol.controllers.users.responses.LoginResponseBody;
 import com.lifenautjoe.bol.domain.User;
 import com.lifenautjoe.bol.services.users.UsersManagerService;
@@ -13,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpSession;
 
 @RestController
-@RequestMapping(path = "users")
+@RequestMapping(path = "api/users")
 public class UsersController {
 
     private UsersManagerService usersManagerService;
@@ -47,7 +48,6 @@ public class UsersController {
     }
 
     @RequestMapping(path = "logout", method = RequestMethod.POST)
-    @ResponseStatus(value = HttpStatus.OK)
     public ResponseEntity<Object> logout(HttpSession httpSession) {
 
         ResponseEntity response;
@@ -62,5 +62,20 @@ public class UsersController {
         }
 
         return response;
+    }
+
+    @RequestMapping(path = "isLoggedIn", method = RequestMethod.POST)
+    public ResponseEntity<IsLoggedInResponse> isLoggedIn(HttpSession httpSession) {
+
+        ResponseEntity response;
+
+        boolean isLoggedIn = usersManagerService.sessionHasUser(httpSession);
+
+        if (isLoggedIn) {
+            User user = usersManagerService.getUserFromSession(httpSession);
+            return ResponseEntity.ok().body(new IsLoggedInResponse(isLoggedIn, user.getName()));
+        }
+
+        return ResponseEntity.ok().body(new IsLoggedInResponse(isLoggedIn));
     }
 }
