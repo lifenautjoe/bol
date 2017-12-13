@@ -13,8 +13,8 @@ public class Game {
     private User userB;
     private GameSlot userAStorageSlot;
     private GameSlot userBStorageSlot;
-    private List<GameSlot> userANormalSlots;
-    private List<GameSlot> userBNormalSlots;
+    private List<GameSlot> userASlots;
+    private List<GameSlot> userBSlots;
     private boolean gameStarted;
     private boolean gameFinished;
     private String name;
@@ -243,6 +243,9 @@ public class Game {
 
         Map<Integer, GameSlot> slots = new HashMap<>();
 
+        List<GameSlot> userANormalSlots = new ArrayList<>();
+        List<GameSlot> userBNormalSlots = new ArrayList<>();
+
         for (int slotId = 1; slotId < BOARD_SLOTS; slotId++) {
 
             User slotOwner = null;
@@ -269,6 +272,8 @@ public class Game {
             slots.put(slotId, slot);
         }
 
+        this.userASlots = userANormalSlots;
+        this.userBSlots = userBNormalSlots;
         this.slots = slots;
     }
 
@@ -317,9 +322,9 @@ public class Game {
         List<GameSlot> normalSlots;
 
         if (isUserB(user)) {
-            normalSlots = userBNormalSlots;
+            normalSlots = userBSlots;
         } else {
-            normalSlots = userANormalSlots;
+            normalSlots = userASlots;
         }
 
         return normalSlots;
