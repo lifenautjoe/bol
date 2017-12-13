@@ -60,6 +60,10 @@ public class User implements Cloneable, Serializable {
         return this.game != null;
     }
 
+    public boolean currentGameIsFull() {
+        return this.game.isFull();
+    }
+
     public boolean hasGameWithName(String gameName) {
         if (!hasGame()) return false;
         return game.getName().equals(gameName);
@@ -69,6 +73,12 @@ public class User implements Cloneable, Serializable {
         Game game = getGame();
         GamePlayOutcome gamePlayOutcome = game.terminateGameForUser(this);
         removeGame();
+        return gamePlayOutcome;
+    }
+
+    public GamePlayOutcome startGame() {
+        Game game = getGame();
+        GamePlayOutcome gamePlayOutcome = game.startGame();
         return gamePlayOutcome;
     }
 
