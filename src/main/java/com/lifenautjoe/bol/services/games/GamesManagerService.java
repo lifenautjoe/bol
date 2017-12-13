@@ -2,6 +2,7 @@ package com.lifenautjoe.bol.services.games;
 
 import com.lifenautjoe.bol.domain.Game;
 import com.lifenautjoe.bol.services.games.exceptions.GameAlreadyExistsException;
+import com.lifenautjoe.bol.services.games.exceptions.GameDoesNotExistsException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,16 +21,12 @@ public class GamesManagerService {
         this.games = Collections.synchronizedMap(new HashMap<String, Game>());
     }
 
-    public Game getOrCreateGameWithName(String gameName) {
-        Game game = getGameWithName(gameName);
+    public Game getGameWithName(String gameName) {
+        Game game = games.get(gameName);
         if (game == null) {
-            game = createGameWithName(gameName);
+            throw new GameDoesNotExistsException();
         }
         return game;
-    }
-
-    public Game getGameWithName(String gameName) {
-        return games.get(gameName);
     }
 
     public Game createGameWithName(String gameName) {
