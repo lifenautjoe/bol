@@ -9,14 +9,14 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 
 @Service
-public class GamesManagerService {
+public class GamesRepositoryService {
 
     private GameFactoryService gameFactoryService;
 
     private Map<String, Game> games;
 
     @Autowired
-    public GamesManagerService(GameFactoryService gameFactoryService) {
+    public GamesRepositoryService(GameFactoryService gameFactoryService) {
         this.gameFactoryService = gameFactoryService;
         this.games = Collections.synchronizedMap(new HashMap<String, Game>());
     }
@@ -54,4 +54,5 @@ public class GamesManagerService {
     public void removeGameWithName(String gameName) {
         games.remove(gameName);
     }
+
 }

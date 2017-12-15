@@ -12,6 +12,7 @@ import java.util.Map;
 // Stores the HTTPSessionID in stomp headers to be able to retrieve session on stomp connect & disconnect
 
 public class HttpSessionIdHandshakeInterceptor implements HandshakeInterceptor {
+    public static final String SESSION_ID_STOMP_HEADER_ATTRIBUTE = "HTTPSESSIONID";
 
     @Override
     public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler wsHandler, Map<String, Object> attributes) throws Exception {
@@ -19,7 +20,7 @@ public class HttpSessionIdHandshakeInterceptor implements HandshakeInterceptor {
             ServletServerHttpRequest servletRequest = (ServletServerHttpRequest) request;
             HttpSession session = servletRequest.getServletRequest().getSession(false);
             if (session != null) {
-                attributes.put("HTTPSESSIONID", session.getId());
+                attributes.put(SESSION_ID_STOMP_HEADER_ATTRIBUTE, session.getId());
             }
         }
         return true;

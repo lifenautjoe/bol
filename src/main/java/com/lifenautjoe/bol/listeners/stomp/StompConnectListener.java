@@ -1,51 +1,41 @@
 package com.lifenautjoe.bol.listeners.stomp;
 
-import com.lifenautjoe.bol.domain.GamePlayOutcome;
+import com.lifenautjoe.bol.config.HttpSessionIdHandshakeInterceptor;
 import com.lifenautjoe.bol.domain.User;
-import com.lifenautjoe.bol.services.sessions.SessionsLookupService;
-import com.lifenautjoe.bol.services.users.UsersManagerService;
+import com.lifenautjoe.bol.services.games.GamesRealtimeService;
+import com.lifenautjoe.bol.services.users.UserAuthenticationService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.messaging.SessionConnectEvent;
-
-import javax.servlet.http.HttpSession;
 
 @Component
 public class StompConnectListener implements ApplicationListener<SessionConnectEvent> {
 
     private final Log logger = LogFactory.getLog(StompConnectListener.class);
 
-    private SessionsLookupService sessionsLookupService;
-    private UsersManagerService usersManagerService;
-    private SimpMessagingTemplate template;
+    private UserAuthenticationService userAuthenticationService;
+    private GamesRealtimeService gamesManager;
 
     @Autowired
-    public StompConnectListener(SessionsLookupService sessionsLookupService, UsersManagerService usersManagerService, SimpMessagingTemplate template) {
-        this.sessionsLookupService = sessionsLookupService;
-        this.usersManagerService = usersManagerService;
-        this.template = template;
+    public StompConnectListener(UserAuthenticationService userAuthenticationService,
+                                GamesRealtimeService gamesManager) {
+        this.userAuthenticationService = userAuthenticationService;
+        this.gamesManager = gamesManager;
     }
 
     public void onApplicationEvent(SessionConnectEvent event) {
         MessageHeaders headers = event.getMessage().getHeaders();
-        String sessionId = SimpMessageHeaderAccessor.getSessionAttributes(headers).get("HTTPSESSIONID").toString();
+        String sessionId = SimpMessageHeaderAccessor.getSessionAttributes(headers).get(HttpSessionIdHandshakeInterceptor.SESSION_ID_STOMP_HEADER_ATTRIBUTE).toString();
 
-        if (sessionsLookupService.hasSessionWithId(sessionId)) {
-            HttpSession session = sessionsLookupService.getSessionWithId(sessionId);
-            if (usersManagerService.sessionHasUser(session)) {
-                User sessionUser = usersManagerService.getUserFromSession(session);
-
-                if (sessionUser.hasGame() && sessionUser.currentGameIsFull()) {
-                    GamePlayOutcome gamePlayOutcome = sessionUser.startGame();
-                    String userGameName = sessionUser.getGameName();
-                    this.template.convertAndSend("/games/" + userGameName, gamePlayOutcome);
-                }
+        if (userAuthenticationService.isLoggedInForSessionWithId(sessionId)) {
+            User sessionUser = userAuthenticationService.getLoggedInUserForSessionWithId(sessionId);
+            if (sessionUser.hasGame() && sessionUser.currentGameIsFull() && !sessionUser.currentGameStarted()) {
+                gamesManager.startGameForUser(sessionUser);
             }
         }
         logger.debug("Connect event [sessionId: " + sessionId + "]");

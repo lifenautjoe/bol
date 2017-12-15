@@ -8,6 +8,7 @@ public class GamePlayOutcome {
     // Make sure they are copies!
     private String nextTurnHolderUserName;
     private String winnerUserName;
+    private String gameName;
     private List<GameSlot> slots;
 
     public String getNextTurnHolderUserName() {
@@ -40,5 +41,13 @@ public class GamePlayOutcome {
 
     public void setSlots(List<GameSlot> slots) {
         this.slots = slots;
+    }
+
+    public String getGameName() {
+        return gameName;
+    }
+
+    public void setGameName(String gameName) {
+        this.gameName = gameName;
     }
 }

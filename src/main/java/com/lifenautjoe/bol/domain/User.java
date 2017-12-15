@@ -64,6 +64,10 @@ public class User implements Cloneable, Serializable {
         return this.game.isFull();
     }
 
+    public boolean currentGameStarted() {
+        return this.game.isGameStarted();
+    }
+
     public boolean hasGameWithName(String gameName) {
         if (!hasGame()) return false;
         return game.getName().equals(gameName);
