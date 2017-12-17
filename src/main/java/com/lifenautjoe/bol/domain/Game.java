@@ -11,6 +11,7 @@ public class Game {
     private static final int STONES_PER_BOARD_SLOT = 6;
     private User userA;
     private User userB;
+    private User nextTurnUser;
     private GameSlot userAStorageSlot;
     private GameSlot userBStorageSlot;
     private List<GameSlot> userASlots;
@@ -51,10 +52,12 @@ public class Game {
 
         setGameStarted(true);
 
-        GamePlayOutcome initialPlayOutcome = new GamePlayOutcome();
+        GamePlayOutcome initialPlayOutcome = makeGamePlayOutcome();
 
-        String firstTurnUserName = getRandomUserName();
-        initialPlayOutcome.setNextTurnHolderUserName(firstTurnUserName);
+        User firstTurnUser = getRandomUser();
+        nextTurnUser = firstTurnUser;
+
+        initialPlayOutcome.setNextTurnHolderUserName(firstTurnUser.getName());
 
         List<GameSlot> initialGameSlots = getSlots();
         initialPlayOutcome.setSlots(initialGameSlots);
@@ -85,6 +88,10 @@ public class Game {
 
     public GamePlayOutcome playAtSlotWithIdForUser(int slotId, User user) {
 
+        if (!userHasNextTurn(user)) {
+            throw new UserHasNoNextTurnException();
+        }
+
         if (!isGameStarted()) {
             throw new GameNotStartedException();
         }
@@ -95,9 +102,9 @@ public class Game {
 
         GameSlot slot = this.getSlotWithId(slotId);
 
-        String nextTurnHolderUserName = getOpponentUserNameForUser(user);
+        User nextTurnHolderUser = getOpponentForUser(user);
 
-        GamePlayOutcome playOutcome = new GamePlayOutcome();
+        GamePlayOutcome playOutcome = makeGamePlayOutcome();
 
         Iterator<GameSlot> slotIterator = getIteratorAtSlot(slot);
 
@@ -117,7 +124,7 @@ public class Game {
                         GameSlotStone userStoneToAddToSlot = userStones.pop();
                         nextSlot.dropStone(userStoneToAddToSlot);
 
-                        nextTurnHolderUserName = user.getName();
+                        nextTurnHolderUser = user;
                     } else if (nextSlot.isEmpty()) {
                         // We take the stone to the storage and all of the ones across
                         GameSlot slotAcrossBoard = getSlotAcrossBoard(nextSlot);
@@ -141,7 +148,8 @@ public class Game {
             }
         }
 
-        playOutcome.setNextTurnHolderUserName(nextTurnHolderUserName);
+        nextTurnUser = nextTurnHolderUser;
+        playOutcome.setNextTurnHolderUserName(nextTurnHolderUser.getName());
 
         List<GameSlot> latestGameSlots = getSlots();
 
@@ -214,6 +222,10 @@ public class Game {
         this.gameFinished = gameFinished;
     }
 
+    public boolean userHasNextTurn(User user) {
+        return this.nextTurnUser == user;
+    }
+
     private void onGameFinished() {
         setGameFinished(true);
     }
@@ -246,7 +258,7 @@ public class Game {
         List<GameSlot> userANormalSlots = new ArrayList<>();
         List<GameSlot> userBNormalSlots = new ArrayList<>();
 
-        for (int slotId = 1; slotId < BOARD_SLOTS; slotId++) {
+        for (int slotId = 1; slotId <= BOARD_SLOTS; slotId++) {
 
             User slotOwner = null;
             boolean userBIsOwner = slotId > slotsPerUser;
@@ -330,13 +342,14 @@ public class Game {
         return normalSlots;
     }
 
-    private String getRandomUserName() {
-        User user = getRandomUser();
-        return user.getName();
-    }
-
     private User getRandomUser() {
         return randomness.nextBoolean() ? userA : userB;
+    }
+
+    private GamePlayOutcome makeGamePlayOutcome() {
+        GamePlayOutcome gamePlayOutcome = new GamePlayOutcome();
+        gamePlayOutcome.setGameName(name);
+        return gamePlayOutcome;
     }
 
 }
