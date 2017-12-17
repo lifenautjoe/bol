@@ -14,5 +14,5 @@ public class Mappings {
 
 
     public static final String REALTIME_CONNECT = "/ws";
-    public static final String REALTIME_GAMES = "/games";
+    public static final String REALTIME_GAME = "/game";
 }
