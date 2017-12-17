@@ -7,11 +7,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+
 @Service
 public class GamesRealtimeService {
 
     private GamesRepositoryService gamesRepositoryService;
     private SimpMessagingTemplate messagingTemplate;
+    private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
     @Autowired
     public GamesRealtimeService(GamesRepositoryService gamesRepositoryService, SimpMessagingTemplate messagingTemplate) {
@@ -28,7 +34,7 @@ public class GamesRealtimeService {
 
     public void startGameForUser(User user) {
         GamePlayOutcome gamePlayOutcome = user.startGame();
-        sendGamePlayOutcome(gamePlayOutcome);
+        sendGamePlayOutcomeWithDelay(gamePlayOutcome);
     }
 
     public void playGameAtSlotWithIdForUser(int slotId, User user) {
@@ -41,8 +47,18 @@ public class GamesRealtimeService {
         }
     }
 
+    private void sendGamePlayOutcomeWithDelay(GamePlayOutcome gamePlayOutcome) {
+        ScheduledFuture<?> countdown = scheduler.schedule(new Runnable() {
+            @Override
+            public void run() {
+                // do the thing
+                sendGamePlayOutcome(gamePlayOutcome);
+            }
+        }, 5, TimeUnit.SECONDS);
+    }
+
     private void sendGamePlayOutcome(GamePlayOutcome gamePlayOutcome) {
         String gameName = gamePlayOutcome.getGameName();
-        messagingTemplate.convertAndSend(Mappings.REALTIME_GAMES + '/' + gameName, gamePlayOutcome);
+        messagingTemplate.convertAndSend(Mappings.REALTIME_GAME + '/' + gameName, gamePlayOutcome);
     }
 }
