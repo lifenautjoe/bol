@@ -41,6 +41,10 @@ public class GameSlot implements Cloneable, Serializable {
         return stonesClone;
     }
 
+    public LinkedList<GameSlotStone> getStones() {
+        return stones;
+    }
+
     @Override
     public GameSlot clone() {
         return SerializationUtils.clone(this);
