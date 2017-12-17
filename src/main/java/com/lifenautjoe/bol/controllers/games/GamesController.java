@@ -145,6 +145,12 @@ public class GamesController {
                     .body("User is not in given game");
         }
 
+        if (!user.hasCurrentGameNextTurn()) {
+            return ResponseEntity
+                    .status(HttpStatus.FORBIDDEN)
+                    .body("User has no turn!");
+        }
+
         int slotIdToPlayAt = body.getSlotId();
 
         gamesRealtimeService.playGameAtSlotWithIdForUser(slotIdToPlayAt, user);
