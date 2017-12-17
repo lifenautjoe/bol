@@ -29,7 +29,7 @@ public class User implements Cloneable, Serializable {
             return false;
         }
         final User other = (User) obj;
-        if ((this.name == null) ? (other.name != null) : !this.name.equals(other.name)) {
+        if ((name == null) ? (other.name != null) : !name.equals(other.name)) {
             return false;
         }
         return true;
@@ -57,15 +57,19 @@ public class User implements Cloneable, Serializable {
     }
 
     public boolean hasGame() {
-        return this.game != null;
+        return game != null;
     }
 
     public boolean currentGameIsFull() {
-        return this.game.isFull();
+        return game.isFull();
     }
 
     public boolean currentGameStarted() {
-        return this.game.isGameStarted();
+        return game.isGameStarted();
+    }
+
+    public boolean hasCurrentGameNextTurn() {
+        return game.userHasNextTurn(this);
     }
 
     public boolean hasGameWithName(String gameName) {
@@ -92,7 +96,7 @@ public class User implements Cloneable, Serializable {
     }
 
     private void removeGame() {
-        this.game = null;
+        game = null;
     }
 
     private Game getGame() {
