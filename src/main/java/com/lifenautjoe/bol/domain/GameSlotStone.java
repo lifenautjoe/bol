@@ -1,6 +1,8 @@
 package com.lifenautjoe.bol.domain;
 
-public class GameSlotStone {
+import java.io.Serializable;
+
+public class GameSlotStone implements Serializable{
     private final int id;
 
     public GameSlotStone(int id) {
