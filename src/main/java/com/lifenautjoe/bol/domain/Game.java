@@ -349,6 +349,8 @@ public class Game {
     private GamePlayOutcome makeGamePlayOutcome() {
         GamePlayOutcome gamePlayOutcome = new GamePlayOutcome();
         gamePlayOutcome.setGameName(name);
+        gamePlayOutcome.setUserAName(userA.getName());
+        gamePlayOutcome.setUserBName(userB.getName());
         return gamePlayOutcome;
     }
 

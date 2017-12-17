@@ -10,6 +10,8 @@ public class GamePlayOutcome {
     private String winnerUserName;
     private String gameName;
     private List<GameSlot> slots;
+    private String userAName;
+    private String userBName;
 
     public String getNextTurnHolderUserName() {
         return nextTurnHolderUserName;
@@ -49,5 +51,21 @@ public class GamePlayOutcome {
 
     public void setGameName(String gameName) {
         this.gameName = gameName;
+    }
+
+    public String getUserAName() {
+        return userAName;
+    }
+
+    public void setUserAName(String userAName) {
+        this.userAName = userAName;
+    }
+
+    public String getUserBName() {
+        return userBName;
+    }
+
+    public void setUserBName(String userBName) {
+        this.userBName = userBName;
     }
 }
