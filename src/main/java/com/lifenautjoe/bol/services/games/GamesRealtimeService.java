@@ -14,6 +14,7 @@ import java.util.concurrent.TimeUnit;
 
 @Service
 public class GamesRealtimeService {
+    private static final int SEND_GAME_PLAY_W_DELAY_SECONDS = 8;
 
     private GamesRepositoryService gamesRepositoryService;
     private SimpMessagingTemplate messagingTemplate;
@@ -53,7 +54,7 @@ public class GamesRealtimeService {
                 // do the thing
                 sendGamePlayOutcome(gamePlayOutcome);
             }
-        }, 5, TimeUnit.SECONDS);
+        }, SEND_GAME_PLAY_W_DELAY_SECONDS, TimeUnit.SECONDS);
     }
 
     private void sendGamePlayOutcome(GamePlayOutcome gamePlayOutcome) {
