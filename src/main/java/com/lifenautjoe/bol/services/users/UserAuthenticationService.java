@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpSession;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -18,11 +19,13 @@ public class UserAuthenticationService {
 
     private GamesRealtimeService gamesRealtimeService;
     private Map<String, User> sessionIdToUserMap;
+    private Map<String, User> loggedInUsers;
 
     @Autowired
     public UserAuthenticationService(GamesRealtimeService gamesRealtimeService) {
         this.gamesRealtimeService = gamesRealtimeService;
         this.sessionIdToUserMap = new HashMap<>();
+        this.loggedInUsers = new HashMap<>();
     }
 
     public void logoutUserForSession(HttpSession httpSession) {
@@ -49,6 +52,7 @@ public class UserAuthenticationService {
         }
         User user = new User(userName);
         sessionIdToUserMap.put(httpSession.getId(), user);
+        loggedInUsers.put(user.getName(), user);
         return user;
     }
 
@@ -70,6 +74,6 @@ public class UserAuthenticationService {
     }
 
     public boolean userWithNameExists(String userName) {
-        return sessionIdToUserMap.containsKey(userName);
+        return loggedInUsers.containsKey(userName);
     }
 }
