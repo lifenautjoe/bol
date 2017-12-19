@@ -21,6 +21,13 @@ java -jar target/bol-0.0.1-SNAPSHOT.jar
 
 Joel Hernández ([@lifenautjoe](www.lifenautjoe.com))
 
+### FAQ
+
+#### Where's the frontend code?
+The project contains the "built" frontend in `src/main/resources/static`.
+
+The frontend code reposiotyr is [here](https://github.com/lifenautjoe/bol-www/).
+
 ### License
 
 MIT
