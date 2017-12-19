@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -38,12 +39,24 @@ public class GamesController {
         this.gamesRealtimeService = gamesRealtimeService;
         this.gamesRepositoryService = gamesRepositoryService;
         this.userAuthenticationService = userAuthenticationService;
-            this.conversionService = conversionService;
-}
+        this.conversionService = conversionService;
+    }
 
 
     @RequestMapping(path = Mappings.API_GAMES_GET_ALL, method = RequestMethod.GET)
-    public ResponseEntity<Object> getAll() {
+    public ResponseEntity<Object> getAll(HttpSession httpSession) {
+        if (!userAuthenticationService.isLoggedInForSession(httpSession)) {
+            return ResponseEntity
+                    .status(HttpStatus.FORBIDDEN)
+                    .body(new ApiResponse("User must be logged in before joining a game"));
+        }
+
+        User user = userAuthenticationService.getLoggedInUserForSession(httpSession);
+
+        if (user.hasGame()) {
+            gamesRealtimeService.terminateGameForUser(user);
+        }
+
         Collection<Game> games = gamesRepositoryService.getAll();
         List<GameResponse> responseGames = new ArrayList<>();
 
@@ -55,7 +68,7 @@ public class GamesController {
     }
 
     @RequestMapping(path = Mappings.API_GAMES_JOIN, method = RequestMethod.POST)
-    public ResponseEntity<Object> joinGame(@RequestBody() JoinGameRequest body,
+    public ResponseEntity<Object> joinGame(@Validated @RequestBody() JoinGameRequest body,
                                            HttpSession httpSession) {
 
         if (!userAuthenticationService.isLoggedInForSession(httpSession)) {
@@ -67,9 +80,7 @@ public class GamesController {
         User user = userAuthenticationService.getLoggedInUserForSession(httpSession);
 
         if (user.hasGame()) {
-            return ResponseEntity
-                    .status(HttpStatus.CONFLICT)
-                    .body(new ApiResponse("User already has a game"));
+            gamesRealtimeService.terminateGameForUser(user);
         }
 
         String gameName = body.getGameName();
@@ -94,7 +105,7 @@ public class GamesController {
     }
 
     @RequestMapping(path = Mappings.API_GAMES_CREATE, method = RequestMethod.PUT)
-    public ResponseEntity<Object> createGame(@RequestBody() JoinGameRequest body,
+    public ResponseEntity<Object> createGame(@Validated @RequestBody() JoinGameRequest body,
                                              HttpSession httpSession) {
 
         if (!userAuthenticationService.isLoggedInForSession(httpSession)) {
@@ -106,9 +117,7 @@ public class GamesController {
         User user = userAuthenticationService.getLoggedInUserForSession(httpSession);
 
         if (user.hasGame()) {
-            return ResponseEntity
-                    .status(HttpStatus.CONFLICT)
-                    .body(new ApiResponse("User already has a game"));
+            gamesRealtimeService.terminateGameForUser(user);
         }
 
         String gameName = body.getGameName();
@@ -127,12 +136,12 @@ public class GamesController {
     }
 
     @RequestMapping(path = Mappings.API_GAMES_PLAY, method = RequestMethod.POST)
-    public ResponseEntity gamePlay(@RequestBody() GamePlayRequest body,
+    public ResponseEntity gamePlay(@Validated @RequestBody() GamePlayRequest body,
                                    HttpSession httpSession) {
         if (!userAuthenticationService.isLoggedInForSession(httpSession)) {
             return ResponseEntity
                     .status(HttpStatus.FORBIDDEN)
-                    .body("User is not logged in");
+                    .body(new ApiResponse("User is not logged in"));
         }
 
 
@@ -142,19 +151,42 @@ public class GamesController {
         if (!user.hasGameWithName(gameName)) {
             return ResponseEntity
                     .status(HttpStatus.FORBIDDEN)
-                    .body("User is not in given game");
+                    .body(new ApiResponse("User is not in given game"));
         }
 
         if (!user.hasCurrentGameNextTurn()) {
             return ResponseEntity
                     .status(HttpStatus.FORBIDDEN)
-                    .body("User has no turn!");
+                    .body(new ApiResponse("User has no turn!"));
         }
 
         int slotIdToPlayAt = body.getSlotId();
 
+
+        if (!user.currentGameCanBePlayedWithSlotAtId(slotIdToPlayAt)) {
+            return ResponseEntity
+                    .status(HttpStatus.FORBIDDEN)
+                    .body(new ApiResponse("The chosen slot cannot be played"));
+        }
+
         gamesRealtimeService.playGameAtSlotWithIdForUser(slotIdToPlayAt, user);
-        return ResponseEntity.ok("Played!");
+        return ResponseEntity.ok(new ApiResponse("Played successfully!"));
     }
 
+    @RequestMapping(path = Mappings.API_GAMES_QUIT, method = RequestMethod.POST)
+    public ResponseEntity gameQuit(HttpSession httpSession) {
+        if (!userAuthenticationService.isLoggedInForSession(httpSession)) {
+            return ResponseEntity
+                    .status(HttpStatus.FORBIDDEN)
+                    .body(new ApiResponse("User is not logged in"));
+        }
+
+        User user = userAuthenticationService.getLoggedInUserForSession(httpSession);
+
+        if (user.hasGame()) {
+            gamesRealtimeService.terminateGameForUser(user);
+        }
+
+        return ResponseEntity.ok(new ApiResponse("Ok"));
+    }
 }

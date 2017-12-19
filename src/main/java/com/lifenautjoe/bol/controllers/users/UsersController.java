@@ -10,6 +10,7 @@ import com.lifenautjoe.bol.services.users.UserAuthenticationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpSession;
@@ -26,7 +27,7 @@ public class UsersController {
     }
 
     @RequestMapping(path = Mappings.API_USERS_LOGIN, method = RequestMethod.POST)
-    public ResponseEntity<Object> login(@RequestBody LoginRequestBody body, HttpSession httpSession) {
+    public ResponseEntity<Object> login(@Validated @RequestBody LoginRequestBody body, HttpSession httpSession) {
 
         String userName = body.getUserName();
 
