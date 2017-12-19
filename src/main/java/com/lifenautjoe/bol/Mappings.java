@@ -11,6 +11,7 @@ public class Mappings {
     public static final String API_GAMES_JOIN = "/join";
     public static final String API_GAMES_CREATE = "/create";
     public static final String API_GAMES_PLAY = "/play";
+    public static final String API_GAMES_QUIT = "/quit";
 
 
     public static final String REALTIME_CONNECT = "/ws";
