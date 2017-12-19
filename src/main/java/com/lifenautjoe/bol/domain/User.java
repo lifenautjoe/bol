@@ -72,6 +72,10 @@ public class User implements Cloneable, Serializable {
         return game.userHasNextTurn(this);
     }
 
+    public boolean currentGameCanBePlayedWithSlotAtId(int slotId) {
+        return !game.slotWithIdIsEmpty(slotId) && game.slotWithIdBelongsToUser(slotId, this);
+    }
+
     public boolean hasGameWithName(String gameName) {
         if (!hasGame()) return false;
         return game.getName().equals(gameName);
@@ -80,7 +84,6 @@ public class User implements Cloneable, Serializable {
     public GamePlayOutcome terminateGame() {
         Game game = getGame();
         GamePlayOutcome gamePlayOutcome = game.terminateGameForUser(this);
-        removeGame();
         return gamePlayOutcome;
     }
 
@@ -95,7 +98,7 @@ public class User implements Cloneable, Serializable {
         return game.getName();
     }
 
-    private void removeGame() {
+    public void removeGame() {
         game = null;
     }
 
