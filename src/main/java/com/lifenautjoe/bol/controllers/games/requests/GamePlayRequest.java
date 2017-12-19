@@ -1,7 +1,17 @@
 package com.lifenautjoe.bol.controllers.games.requests;
 
+import javax.validation.constraints.*;
+
 public class GamePlayRequest {
+
+    @NotNull
+    @Max(14)
+    @Min(1)
     private int slotId;
+
+    @NotNull
+    @Size(min = 3, max = 12)
+    @Pattern(regexp = "^[a-zA-Z0-9 ]*")
     private String gameName;
 
     public GamePlayRequest() {

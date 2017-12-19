@@ -1,13 +1,13 @@
 package com.lifenautjoe.bol.controllers.users.responses;
 
 public class LoginResponseBody {
-    private String loggedInUser;
+    private String userName;
 
-    public LoginResponseBody(String loggedInUser) {
-        this.loggedInUser = loggedInUser;
+    public LoginResponseBody(String userName) {
+        this.userName = userName;
     }
 
-    public String getLoggedInUser() {
-        return loggedInUser;
+    public String getUserName() {
+        return userName;
     }
 }
