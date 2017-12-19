@@ -35,7 +35,8 @@ public class StompDisconnectListener implements ApplicationListener<SessionDisco
         if (userAuthenticationService.isLoggedInForSessionWithId(sessionId)) {
             User sessionUser = userAuthenticationService.getLoggedInUserForSessionWithId(sessionId);
             if (sessionUser.hasGame()) {
-                gamesManager.terminateGameForUser(sessionUser);
+                // Check that the terminated game is indeed the one we disconnected from!
+                //gamesManager.terminateGameForUser(sessionUser);
             }
         }
 

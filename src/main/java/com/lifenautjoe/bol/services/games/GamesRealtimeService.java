@@ -39,11 +39,10 @@ public class GamesRealtimeService {
 
     public void playGameAtSlotWithIdForUser(int slotId, User user) {
         GamePlayOutcome playOutcome = user.playGameAtSlotWithId(slotId);
+        sendGamePlayOutcome(playOutcome);
 
         if (playOutcome.isGameFinished()) {
-            terminateGameForUser(user);
-        } else {
-            sendGamePlayOutcome(playOutcome);
+            gamesRepositoryService.removeGameWithName(playOutcome.getGameName());
         }
     }
 
