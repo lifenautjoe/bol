@@ -8,8 +8,23 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
 public class ForwardingController {
-    @RequestMapping("/{path:[^\\.]+}/**")
-    public String forward() {
+    @RequestMapping("/auth")
+    public String auth() {
+        return forwardToRoot();
+    }
+
+    @RequestMapping("/games")
+    public String games() {
+        return forwardToRoot();
+    }
+
+    @RequestMapping("/game")
+    public String game() {
+        return forwardToRoot();
+    }
+
+    public String forwardToRoot() {
         return "forward:/";
     }
+
 }
